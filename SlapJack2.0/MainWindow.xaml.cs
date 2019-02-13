@@ -54,13 +54,23 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private void Begin_Click(Object sender, RoutedEventArgs e)
         {
-            BeginExecute();
+            if (String.IsNullOrEmpty(NameTxtBox.Text))
+            {
+                nameLabel.Foreground = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                BeginExecute();
+            }
+            
         }
 
         private void BeginExecute()
         {
             beginButtin.Visibility = Visibility.Hidden;
             gameTittleLabel.Visibility = Visibility.Hidden;
+            NameTxtBox.Visibility = Visibility.Hidden;
+            nameLabel.Visibility = Visibility.Hidden;
             SlapButton.Visibility = Visibility.Visible;
             SlapButton.IsEnabled = false;
             FlipButton.Visibility = Visibility.Visible;
@@ -70,6 +80,8 @@ namespace SlapJackGame
             CompHand1.Visibility = Visibility.Visible;
             CompHand2.Visibility = Visibility.Visible;
             CompHand3.Visibility = Visibility.Visible;
+            playerName.Visibility = Visibility.Visible;
+            playerName.Text = NameTxtBox.Text;
             SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
         }
 

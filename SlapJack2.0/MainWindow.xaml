@@ -15,9 +15,9 @@
         <Button x:Name="beginButtin" 
                 Content="Lets Begin!" 
                 HorizontalAlignment="Left" 
-                Margin="530,173,0,0" 
+                Margin="490,324,0,0" 
                 VerticalAlignment="Top" 
-                Width="151" 
+                Width="152" 
                 Height="35" 
                 FontFamily="Yu Gothic UI Semibold" 
                 FontSize="20" 
@@ -90,10 +90,31 @@
                    FontSize="20"
                    FontFamily="Yu Gothic UI Semibold" 
                    Visibility="Hidden">
+
             <TextBlock.Background>
                 <SolidColorBrush Opacity="0" />
             </TextBlock.Background>
         </TextBlock>
+        <Border  BorderBrush="#664400"
+                BorderThickness="3" VerticalAlignment="Bottom" >       
+            <TextBlock x:Name="playerName"  
+                   HorizontalAlignment="Left" 
+                   TextAlignment="Center"
+                   Height="35" 
+                   Margin="25,431,0,55" 
+                   Text="" 
+                   Width="165" 
+                   VerticalAlignment="Center"
+                   FontSize="20"
+                   FontFamily="Yu Gothic UI Semibold" 
+                   Visibility="Hidden">
+            <TextBlock.Background>
+                <SolidColorBrush Color="#9F6700" Opacity="1" />
+            </TextBlock.Background>
+            </TextBlock>
+        </Border>
+
+
         <Image x:Name="PlayerHand" 
                Source="/image/CardBack.jpg"  
                Visibility="Collapsed"
@@ -119,5 +140,24 @@
                 Height="33" 
                 Margin="352,93,352.6,198.8" 
                 MouseDown="SlapButton_Click"/>
+        <TextBox x:Name="NameTxtBox" 
+                   HorizontalAlignment="Left" 
+                   Margin="439,224,0,0" 
+                   TextWrapping="Wrap" 
+                   VerticalAlignment="Top" 
+                   Height="32" Width="293" 
+                   Background="#FFFFF2F2" 
+                   FontSize="22"
+                   FontFamily="Yu Gothic UI Semibold"/>
+        <Label x:Name="nameLabel" 
+               Content="Enter your name." 
+               HorizontalAlignment="Left" 
+               Margin="439,177,0,0" 
+               VerticalAlignment="Top" 
+               FontSize="24" 
+               FontWeight="Bold"
+               FontFamily="Yu Gothic UI Semibold" />
+
+
     </Grid>
 </Window>
