@@ -156,5 +156,8 @@
     <Resource Include="image\CardBack.jpg" />
     <Resource Include="image\game_background.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\questionmark.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

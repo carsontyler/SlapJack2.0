@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Assignment1;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,8 +17,12 @@ namespace SlapJackGame
     {
         #region Fields
 
-        Board _board;
+        private Board _board;
         string _gamePileImage = "pack://application:,,,/image/CardBack.jpg";
+        private delegate void NoArgDelegate();
+        private Player _player;
+        private bool _timerDone = false;
+        System.Windows.Threading.DispatcherTimer _dispatcherTimer;
 
         #endregion
 
@@ -34,6 +40,8 @@ namespace SlapJackGame
         public MainWindow()
         {
             InitializeComponent();
+            NameLabel.Background.Opacity = 0.5;
+            GameTitleLabel.Background.Opacity = 0.5;
             _board = new Board();
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
         }
@@ -55,22 +63,17 @@ namespace SlapJackGame
         private void Begin_Click(Object sender, RoutedEventArgs e)
         {
             if (String.IsNullOrEmpty(NameTxtBox.Text))
-            {
-                nameLabel.Foreground = new SolidColorBrush(Colors.Red);
-            }
+                NameLabel.Foreground = new SolidColorBrush(Colors.Red);
             else
-            {
                 BeginExecute();
-            }
-            
         }
 
         private void BeginExecute()
         {
-            beginButtin.Visibility = Visibility.Hidden;
-            gameTittleLabel.Visibility = Visibility.Hidden;
+            BeginButton.Visibility = Visibility.Hidden;
+            GameTitleLabel.Visibility = Visibility.Hidden;
             NameTxtBox.Visibility = Visibility.Hidden;
-            nameLabel.Visibility = Visibility.Hidden;
+            NameLabel.Visibility = Visibility.Hidden;
             SlapButton.Visibility = Visibility.Visible;
             SlapButton.IsEnabled = false;
             FlipButton.Visibility = Visibility.Visible;
@@ -80,24 +83,20 @@ namespace SlapJackGame
             CompHand1.Visibility = Visibility.Visible;
             CompHand2.Visibility = Visibility.Visible;
             CompHand3.Visibility = Visibility.Visible;
-            playerName.Visibility = Visibility.Visible;
-            playerName.Text = NameTxtBox.Text;
+            PlayerName.Visibility = Visibility.Visible;
+            PlayerName.Content = NameTxtBox.Text;
             SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
+            QuestionMark.Visibility = Visibility.Hidden;
+            QuestionMark2.Visibility = Visibility.Visible;
         }
 
         private void GameHander()
         {
-            bool keepGoing = true;
-            while (keepGoing)
+            var card = _player.FlipCard();
+            Application.Current.Dispatcher.Invoke(delegate
             {
-                foreach (var player in _board.Players)
-                {
-                    if (!player.GetIsComputer())
-                    {
-                        System.Threading.Thread.SpinWait(100000);
-                    }
-                }
-            }
+                AddToGamePile(card);
+            });
         }
 
         /// <summary>
@@ -106,9 +105,22 @@ namespace SlapJackGame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void FlipButton_Click(object sender, RoutedEventArgs e)
+        private async void FlipButton_Click(object sender, RoutedEventArgs e)
         {
             FlipButtonExecute();
+            CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
+            FlipButton.IsEnabled = false;
+            SlapButton.IsEnabled = true;
+            
+            // If the player is a computer and has Any cards in their hand
+            foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
+            {
+                _player = player;
+                await Task.Delay(2000);
+                GameHander();
+            }
+
+            FlipButton.IsEnabled = true;
         }
 
         private void FlipButtonExecute()
@@ -120,35 +132,43 @@ namespace SlapJackGame
             else
             {
                 var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
-                _board.AddToGamePile(card);
-
-                Border blackBorder = new Border
+                Application.Current.Dispatcher.Invoke(delegate
                 {
-                    BorderThickness = new Thickness(1),
-                    BorderBrush = new SolidColorBrush(Colors.Black),
-                    Width = 82,
-                    Height = 120
-                };
-                Image cardImage = new Image
-                {
-                    Width = 92,
-                    Height = 120
-                };
-                Uri imageUri = new Uri(card.GetCardPicture(), UriKind.Relative);
-                BitmapImage imageBitmap = new BitmapImage(imageUri);
-                cardImage.Source = imageBitmap;
-                blackBorder.Child = cardImage;
-                Canvas.SetTop(blackBorder, 9);
-                Canvas.SetLeft(blackBorder, 0);
-                GamePile.Children.Add(blackBorder);
+                    AddToGamePile(card);
+                });
             }
+        }
 
-            
-            
+        private void OnTimedEvent(Object source, EventArgs e)
+        {
+            GameHander();
+            _dispatcherTimer.Stop();
+        }
 
-            CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
-            FlipButton.IsEnabled = false;
-            SlapButton.IsEnabled = true;
+        private void AddToGamePile(Card card)
+        {
+            _board.AddToGamePile(card);
+
+            Border blackBorder = new Border
+            {
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Colors.Black),
+                Width = 82,
+                Height = 120
+            };
+            Image cardImage = new Image
+            {
+                Width = 92,
+                Height = 120
+            };
+            Uri imageUri = new Uri(card.GetCardPicture(), UriKind.Relative);
+            BitmapImage imageBitmap = new BitmapImage(imageUri);
+            cardImage.Source = imageBitmap;
+            blackBorder.Child = cardImage;
+            Canvas.SetTop(blackBorder, 9);
+            Canvas.SetLeft(blackBorder, 0);
+            GamePile.Children.Add(blackBorder);
+            SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
         }
 
         /// <summary>
@@ -167,8 +187,8 @@ namespace SlapJackGame
             if (!SlapButton.IsEnabled)
                 return;
             _board.UserSlap();
-            FlipButton.IsEnabled = true;
-            SlapButton.IsEnabled = false;
+            //FlipButton.IsEnabled = true;
+            //SlapButton.IsEnabled = false;
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
         }
 
@@ -184,6 +204,27 @@ namespace SlapJackGame
                 SlapButtonExecute();
             else if (key.ToLower() == "f")
                 FlipButtonExecute();
+        }
+
+        /// <summary>
+        /// Opens a new help window with instructions on how to play the game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void QuestionMark_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var instructions = "Welcome to the Slap Jack Game! \nHOW TO WIN: \n    Be the last player to run out of cards!" +
+                "\n\nCONTROLS: \n    There are 3 different ways to slap the game pile: click the 'Slap' button, click the game pile of cards, or " +
+                "press the Spacebar. Upon winning (or losing), you will be prompted to either start a new game or exit the app." +
+                "\n\nHOW TO PLAY: \n    1. Enter your name in the text box and press 'Let's Begin!'" +
+                "\n    2. Once the cards are dealt out, cards will automatically be dealt out, starting with you (the bottom card) and moving " +
+                "in a clockwise fashion. \n    3. When a Jack (of any suit) is flipped onto the center game pile, be the first one to slap the pile! " +
+                "\n    4. The first player to slap the pile collects the game pile and shuffles them into their hand. \n    5. Continue flipping " +
+                "and slapping on Jacks until you run out of cards. The last player to run out of cards wins the game! " +
+                "\n    6. If you slap the deck when a Jack is not flipped, you must choose a random card from your hand and pass it to the player " +
+                "on your left. \n     7. If you run out of cards, you are still in the game until a Jack is dealt. If a Jack is dealt and you " +
+                "are not the first player to slap it, you lose! If you do slap the Jack, you collect the game pile and continue on!";
+            MessageBox.Show(instructions, "How to Play");
         }
 
         #endregion
