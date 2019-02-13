@@ -1,5 +1,6 @@
 ﻿using Assignment1;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,8 +22,6 @@ namespace SlapJackGame
         string _gamePileImage = "pack://application:,,,/image/CardBack.jpg";
         private delegate void NoArgDelegate();
         private Player _player;
-        private bool _timerDone = false;
-        System.Windows.Threading.DispatcherTimer _dispatcherTimer;
 
         #endregion
 
@@ -139,12 +138,6 @@ namespace SlapJackGame
             }
         }
 
-        private void OnTimedEvent(Object source, EventArgs e)
-        {
-            GameHander();
-            _dispatcherTimer.Stop();
-        }
-
         private void AddToGamePile(Card card)
         {
             _board.AddToGamePile(card);
@@ -177,9 +170,11 @@ namespace SlapJackGame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SlapButton_Click(object sender, RoutedEventArgs e)
+        private async void SlapButton_Click(object sender, RoutedEventArgs e)
         {
             SlapButtonExecute();
+            SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
+            await Task.Delay(1000);
         }
 
         private void SlapButtonExecute()
@@ -187,8 +182,8 @@ namespace SlapJackGame
             if (!SlapButton.IsEnabled)
                 return;
             _board.UserSlap();
-            //FlipButton.IsEnabled = true;
-            //SlapButton.IsEnabled = false;
+            if (!_board.GamePile.Any())
+                GamePile.Children.Clear();
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
         }
 
