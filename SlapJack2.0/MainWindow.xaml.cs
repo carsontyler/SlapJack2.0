@@ -22,7 +22,7 @@ namespace SlapJackGame
 
         #region Properties 
 
-        public string GamePileImage { get => _gamePileImage; set => _gamePileImage = value; }
+        public string GamePileImage { get { return _gamePileImage; } set { _gamePileImage = value; } }
 
         #endregion
 
@@ -101,27 +101,38 @@ namespace SlapJackGame
 
         private void FlipButtonExecute()
         {
-            var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
-            _board.AddToGamePile(card);
-            Border blackBorder = new Border
+            if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
-                BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Colors.Black),
-                Width = 82,
-                Height = 120
-            };
-            Image cardImage = new Image
+                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
+            }
+            else
             {
-                Width = 92,
-                Height = 120
-            };
-            Uri imageUri = new Uri(card.GetCardPicture(), UriKind.Relative);
-            BitmapImage imageBitmap = new BitmapImage(imageUri);
-            cardImage.Source = imageBitmap;
-            blackBorder.Child = cardImage;
-            Canvas.SetTop(blackBorder, 9);
-            Canvas.SetLeft(blackBorder, 0);
-            GamePile.Children.Add(blackBorder);
+                var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
+                _board.AddToGamePile(card);
+
+                Border blackBorder = new Border
+                {
+                    BorderThickness = new Thickness(1),
+                    BorderBrush = new SolidColorBrush(Colors.Black),
+                    Width = 82,
+                    Height = 120
+                };
+                Image cardImage = new Image
+                {
+                    Width = 92,
+                    Height = 120
+                };
+                Uri imageUri = new Uri(card.GetCardPicture(), UriKind.Relative);
+                BitmapImage imageBitmap = new BitmapImage(imageUri);
+                cardImage.Source = imageBitmap;
+                blackBorder.Child = cardImage;
+                Canvas.SetTop(blackBorder, 9);
+                Canvas.SetLeft(blackBorder, 0);
+                GamePile.Children.Add(blackBorder);
+            }
+
+            
+            
 
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
             FlipButton.IsEnabled = false;

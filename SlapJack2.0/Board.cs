@@ -22,7 +22,7 @@ namespace SlapJackGame
 
         public Deck Deck { get; set; }
         public List<Player> Players { get; set; }
-        public List<Card> GamePile { get => _gamePile; set => _gamePile = value; }
+        public List<Card> GamePile { get { return _gamePile; } set { _gamePile = value; } }
 
         #endregion
 
@@ -38,7 +38,7 @@ namespace SlapJackGame
             GamePile = new List<Card>();
             for (int i = 0; i < 4; i++)
             {
-                if(i == 0)
+                if (i == 0)
                     Players.Add(new Player(false));
                 else
                     Players.Add(new Player(true));
