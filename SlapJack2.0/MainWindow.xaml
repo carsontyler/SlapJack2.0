@@ -12,7 +12,7 @@
         <Grid.Background>
             <ImageBrush ImageSource="image/background.jpg"/>
         </Grid.Background>
-        <Button x:Name="beginButtin" 
+        <Button x:Name="BeginButton" 
                 Content="Lets Begin!" 
                 HorizontalAlignment="Left" 
                 Margin="490,324,0,0" 
@@ -25,7 +25,7 @@
                 Click="Begin_Click"
                 BorderBrush="#664400"
                 BorderThickness="3"/>
-        <Label x:Name="gameTittleLabel" 
+        <Label x:Name="GameTitleLabel" 
                Content="Slap-Jack Game" 
                HorizontalAlignment="Center" 
                Margin="405,0,28,0" 
@@ -33,8 +33,8 @@
                Width="353" 
                FontSize="48" 
                FontWeight="Bold" 
+               Background="#9F6700"
                FontFamily="Yu Gothic UI Semibold" 
-               Background="#00000000" 
                Foreground="Black"/>
         <Button x:Name="FlipButton" 
                 Content="Flip" 
@@ -95,26 +95,21 @@
                 <SolidColorBrush Opacity="0" />
             </TextBlock.Background>
         </TextBlock>
-        <Border  BorderBrush="#664400"
-                BorderThickness="3" VerticalAlignment="Bottom" >       
-            <TextBlock x:Name="playerName"  
-                   HorizontalAlignment="Left" 
-                   TextAlignment="Center"
-                   Height="35" 
-                   Margin="25,431,0,55" 
-                   Text="" 
-                   Width="165" 
-                   VerticalAlignment="Center"
-                   FontSize="20"
-                   FontFamily="Yu Gothic UI Semibold" 
-                   Visibility="Hidden">
-            <TextBlock.Background>
-                <SolidColorBrush Color="#9F6700" Opacity="1" />
-            </TextBlock.Background>
-            </TextBlock>
-        </Border>
-
-
+        <Label x:Name="PlayerName"  
+               HorizontalAlignment="Left" 
+               VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Center"
+               Height="43" 
+               Margin="61,431,0,55" 
+               Width="165" 
+               VerticalAlignment="Center"
+               FontSize="20"
+               FontFamily="Yu Gothic UI Semibold" 
+               Background="#9F6700"
+               Content="aTESTg"
+               Visibility="Hidden"
+               BorderBrush="#664400"
+               BorderThickness="3"/>
         <Image x:Name="PlayerHand" 
                Source="/image/CardBack.jpg"  
                Visibility="Collapsed"
@@ -149,15 +144,25 @@
                    Background="#FFFFF2F2" 
                    FontSize="22"
                    FontFamily="Yu Gothic UI Semibold"/>
-        <Label x:Name="nameLabel" 
-               Content="Enter your name." 
+        <Label x:Name="NameLabel" 
+               Content="Enter Your Name:" 
                HorizontalAlignment="Left" 
-               Margin="439,177,0,0" 
+               Margin="439,176,0,0" 
+               Background="#9F6700"
                VerticalAlignment="Top" 
-               FontSize="24" 
+               FontSize="23" 
                FontWeight="Bold"
-               FontFamily="Yu Gothic UI Semibold" />
-
-
+               FontFamily="Yu Gothic UI Semibold">
+        </Label>
+        <Image x:Name="QuestionMark"
+               Source="/image/questionmark.png"
+               Visibility="Visible" 
+               Margin="733,471,-0.4,-0.2"
+               MouseDown="QuestionMark_MouseDown"/>
+        <Image x:Name="QuestionMark2"
+               Source="image/questionmark.png"
+               Visibility="Hidden" 
+               Margin="0,5,731.6,470.8"
+               MouseDown="QuestionMark_MouseDown"/>
     </Grid>
 </Window>
