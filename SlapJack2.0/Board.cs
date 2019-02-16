@@ -5,6 +5,7 @@ using System.Linq;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SlapJackGame
 {
@@ -118,9 +119,32 @@ namespace SlapJackGame
             }
             else
             {
+                MessageBox.Show("You slapped on a card that's not a Jack. You lose one card!", "Incorrect Slap", MessageBoxButton.OK);
                 var card = Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.RemoveCard();
                 Players.FirstOrDefault(a => a.GetIsComputer()).Hand.AddCard(card);
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Method that checks for a computer's slap. If the card is a Jack
+        /// </summary>
+        /// <param name="temp"></param>
+        public void ComputerSlap(Player currentComputer)
+        {
+            //Check for Jack
+            if (GamePile.Any() && GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
+            {
+                //Make computer wait, and then check to see if pile still exists
+                //If it does, computer gets the slap
+
+                if (!(GamePile.Count == 0))
+                {
+                    //currentComputer.Slap(true, GamePile);
+                    MessageBox.Show("Computer got the slap!");
+                    currentComputer.Slap(true, GamePile);
+                    ClearGamePile(currentComputer);
+                }
             }
         }
 

@@ -162,10 +162,20 @@ namespace SlapJackGame
             // If the player is a computer and has Any cards in their hand
             foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
             {
+                //Simulate the computer slap
+                await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
+
+                if (!_board.GamePile.Any())
+                    GamePile.Children.Clear();
+                CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
+
                 _player = player;
                 await Task.Delay(2000);
                 GameHander();
             }
+            //Simulate the computer slap after the last computer has gone
+            await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
+
 
             if (AutoFlipYN.IsChecked ?? false)
             {
