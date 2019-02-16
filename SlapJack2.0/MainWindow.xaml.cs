@@ -92,6 +92,22 @@ namespace SlapJackGame
         private void GameHander()
         {
             var card = _player.FlipCard();
+            if(_player.Hand.GetSize() == 0)
+            {
+                _player.LastChance = true;
+                if (CompHand1.Visibility != Visibility.Hidden)
+                {
+                    CompHand1.Visibility = Visibility.Hidden;
+                }
+                else if(CompHand2.Visibility != Visibility.Hidden)
+                {
+                    CompHand2.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    CompHand3.Visibility = Visibility.Hidden;
+                }
+            }
             Application.Current.Dispatcher.Invoke(delegate
             {
                 AddToGamePile(card);
@@ -135,6 +151,7 @@ namespace SlapJackGame
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
                 MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
+                _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
             }
             else
             {
@@ -191,18 +208,28 @@ namespace SlapJackGame
 
         private void SlapButtonExecute()
         {
-            bool slap;
+            /// bool to test if player slapped on jack
+            bool RightSlap;
             if (!SlapButton.IsEnabled)
                 return;
-           slap = _board.UserSlap();
+           RightSlap = _board.UserSlap();
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
-            if(!slap)
+
+            foreach (var player in _board.Players)
+            {
+                if(player.LastChance == true)
+                {
+                    _board.Players.Remove(player);
+                }
+            }
+
+            ///if slapped on something besides jack disable slap button
+            if (!RightSlap)
             {
                 SlapButton.IsEnabled = false;
             }
-               
         }
 
         /// <summary>

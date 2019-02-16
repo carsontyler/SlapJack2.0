@@ -22,6 +22,10 @@ namespace SlapJackGame
         #region Properties
 
         public Hand Hand { get; set; }
+        /// <summary>
+        /// bool for if player runs out of cards. Last time to slap in.
+        /// </summary>
+        public bool LastChance = false;
 
         #endregion
 
