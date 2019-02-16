@@ -123,14 +123,14 @@ namespace SlapJackGame
         public void ComputerSlap(Player currentComputer)
         {
             //Check for Jack
-            if (GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
+            if (GamePile.Any() && GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
             {
                 //Make computer wait, and then check to see if pile still exists
                 //If it does, computer gets the slap
 
-
                 if (!(GamePile.Count == 0))
                 {
+                    //currentComputer.Slap(true, GamePile);
                     MessageBox.Show("Computer got the slap!");
                     currentComputer.Slap(true, GamePile);
                     ClearGamePile(currentComputer);

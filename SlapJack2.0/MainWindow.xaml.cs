@@ -119,7 +119,7 @@ namespace SlapJackGame
             foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
             {
                 //Simulate the computer slap
-                _board.ComputerSlap(_player);
+                await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
 
                 if (!_board.GamePile.Any())
                     GamePile.Children.Clear();
@@ -132,7 +132,7 @@ namespace SlapJackGame
                 
             }
             //Simulate the computer slap after the last computer has gone
-            _board.ComputerSlap(_player);
+            await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
 
             FlipButton.IsEnabled = true;
         }
