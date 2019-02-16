@@ -1,0 +1,16 @@
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\bin\Debug\SlapJack2.0.exe.config
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\bin\Debug\SlapJack2.0.exe
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\bin\Debug\SlapJack2.0.pdb
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0.csprojAssemblyReference.cache
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\MainWindow.g.cs
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\App.g.cs
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0_MarkupCompile.cache
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0_MarkupCompile.lref
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\MainWindow.baml
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0.g.resources
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2._0.Properties.Resources.resources
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0.csproj.GenerateResource.cache
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0.csproj.CoreCompileInputs.cache
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0.exe
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0.pdb
+C:\Users\trabjam\Downloads\SlapJack2.0-Carson-s\SlapJack2.0\obj\Debug\SlapJack2.0_Content.g.cs
