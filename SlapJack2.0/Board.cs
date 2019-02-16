@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Speech.Synthesis;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,8 @@ namespace SlapJackGame
         #region Fields
 
         private List<Card> _gamePile = new List<Card>();
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+
 
         #endregion
 
@@ -85,6 +88,11 @@ namespace SlapJackGame
         /// <param name="card">The card to be added</param>
         public void AddToGamePile(Card card)
         {
+            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            synthesizer.Volume = 100;  // (0 - 100)
+            synthesizer.Rate = 0;     // (-10 - 10)
+
+            synthesizer.SpeakAsync("" + card.ToString());
             GamePile.Add(card);
         }
 

@@ -57,6 +57,34 @@
             return FaceUp ? CardFaceImg : CardBackImg;
         }
 
+        public override string ToString()
+        {
+            string face = "";
+
+            switch (CardNum)
+            {
+                case 1:
+                    face = "ace";
+                    break;
+
+                case 11:
+                    face = "jack";
+                    break;
+
+                case 12:
+                    face = "queen";
+                    break;
+
+                case 13:
+                    face = "king";
+                    break;
+            }
+
+            if(CardNum == 1 || CardNum > 10)
+                return face + " of " + _suit;
+            else
+                return CardNum + " of " + _suit;
+        }
         #endregion 
     }
 }

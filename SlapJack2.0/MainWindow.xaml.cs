@@ -1,6 +1,10 @@
 ﻿using Assignment1;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Media;
+using System.Speech.Synthesis;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +25,7 @@ namespace SlapJackGame
         string _gamePileImage = "pack://application:,,,/image/CardBack.jpg";
         private delegate void NoArgDelegate();
         private Player _player;
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
 
         #endregion
 
@@ -37,6 +42,7 @@ namespace SlapJackGame
         /// </summary>
         public MainWindow()
         {
+
             InitializeComponent();
             NameLabel.Background.Opacity = 0.5;
             GameTitleLabel.Background.Opacity = 0.5;
@@ -60,10 +66,28 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private void Begin_Click(Object sender, RoutedEventArgs e)
         {
+            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            synthesizer.Volume = 100;  // (0 - 100)
+            synthesizer.Rate = 0;     // (-10 - 10)           
+
+
             if (String.IsNullOrEmpty(NameTxtBox.Text))
+            {
                 NameLabel.Foreground = new SolidColorBrush(Colors.Red);
+                synthesizer.SpeakAsync("Please enter player's name");
+            }
             else
+            {
                 BeginExecute();
+                SoundPlayer player = new SoundPlayer(SlapJack2._0.Properties.Resources.ahem_x);
+                player.Play();
+
+                System.Threading.Thread.Sleep(2000);
+
+                synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
+                synthesizer.SpeakAsync("Best of luck");
+                synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
+            }
         }
 
         /// <summary>
@@ -135,7 +159,6 @@ namespace SlapJackGame
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
             FlipButton.IsEnabled = false;
             SlapButton.IsEnabled = true;
-
             // If the player is a computer and has Any cards in their hand
             foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
             {
@@ -161,6 +184,14 @@ namespace SlapJackGame
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
                 PlayerHand.Visibility = Visibility.Hidden;
+                
+                synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult); 
+                synthesizer.Volume = 100;  // (0 - 100)
+                synthesizer.Rate = 0;     // (-10 - 10)
+                                          
+                synthesizer.SpeakAsync("You're out of cards!");
+
+                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
                 _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
             }
             else
@@ -211,12 +242,16 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void SlapButton_Click(object sender, RoutedEventArgs e)
         {
-            //if (!SlapButton.IsEnabled)
-            //    return;
-            SlapButtonExecute();
-            if (_board.GamePile.Count == 0)
-                SlapButton.IsEnabled = false;
+            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            synthesizer.Volume = 100;  // (0 - 100)
+            synthesizer.Rate = 0;     // (-10 - 10)
 
+            synthesizer.SpeakAsync("Slapped");
+
+            SlapButtonExecute();
+            if(_board.GamePile.Count == 0)
+                SlapButton.IsEnabled = false;
+            
             SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
             await Task.Delay(1000);
         }
