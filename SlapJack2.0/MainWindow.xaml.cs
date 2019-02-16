@@ -96,6 +96,10 @@ namespace SlapJackGame
             {
                 AddToGamePile(card);
             });
+            if(SlapButton.IsEnabled == false)
+            {
+                SlapButton.IsEnabled = true;
+            }
         }
 
         /// <summary>
@@ -107,6 +111,10 @@ namespace SlapJackGame
         private async void FlipButton_Click(object sender, RoutedEventArgs e)
         {
             FlipButtonExecute();
+            if (SlapButton.IsEnabled == false)
+            {
+                SlapButton.IsEnabled = true;
+            }
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
             FlipButton.IsEnabled = false;
             SlapButton.IsEnabled = true;
@@ -173,18 +181,28 @@ namespace SlapJackGame
         private async void SlapButton_Click(object sender, RoutedEventArgs e)
         {
             SlapButtonExecute();
+            if(_board.GamePile.Count == 0)
+            {
+                SlapButton.IsEnabled = false;
+            }
             SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
             await Task.Delay(1000);
         }
 
         private void SlapButtonExecute()
         {
+            bool slap;
             if (!SlapButton.IsEnabled)
                 return;
-            _board.UserSlap();
+           slap = _board.UserSlap();
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
+            if(!slap)
+            {
+                SlapButton.IsEnabled = false;
+            }
+               
         }
 
         /// <summary>

@@ -100,17 +100,19 @@ namespace SlapJackGame
         /// <summary>
         /// Execute on a User Slap Button press. May be used for a computer slap
         /// </summary>
-        public void UserSlap()
+        public bool UserSlap()
         {
             if (GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
             {
                 Players.FirstOrDefault(a => !a.GetIsComputer()).Slap(true, GamePile);
                 ClearGamePile(Players.FirstOrDefault(a => !a.GetIsComputer()));
+                return true;
             }
             else
             {
                 var card = Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.RemoveCard();
                 Players.FirstOrDefault(a => a.GetIsComputer()).Hand.AddCard(card);
+                return false;
             }
         }
 
