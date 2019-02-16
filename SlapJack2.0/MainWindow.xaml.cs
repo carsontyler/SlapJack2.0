@@ -1,6 +1,5 @@
 ﻿using Assignment1;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -67,6 +66,10 @@ namespace SlapJackGame
                 BeginExecute();
         }
 
+        /// <summary>
+        /// When the user clicks 'Let's Begin!'. 
+        /// Sets the visibilty of various components to display the game board.
+        /// </summary>
         private void BeginExecute()
         {
             BeginButton.Visibility = Visibility.Hidden;
@@ -87,35 +90,31 @@ namespace SlapJackGame
             SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
             QuestionMark.Visibility = Visibility.Hidden;
             QuestionMark2.Visibility = Visibility.Visible;
+            AutoFlipYN.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Handles the automation of the computers
+        /// </summary>
         private void GameHander()
         {
             var card = _player.FlipCard();
-            if(_player.Hand.GetSize() == 0)
+            if (_player.Hand.GetSize() == 0)
             {
                 _player.LastChance = true;
                 if (CompHand1.Visibility != Visibility.Hidden)
-                {
                     CompHand1.Visibility = Visibility.Hidden;
-                }
-                else if(CompHand2.Visibility != Visibility.Hidden)
-                {
+                else if (CompHand2.Visibility != Visibility.Hidden)
                     CompHand2.Visibility = Visibility.Hidden;
-                }
                 else
-                {
                     CompHand3.Visibility = Visibility.Hidden;
-                }
             }
             Application.Current.Dispatcher.Invoke(delegate
             {
                 AddToGamePile(card);
             });
-            if(SlapButton.IsEnabled == false)
-            {
+            if (SlapButton.IsEnabled == false)
                 SlapButton.IsEnabled = true;
-            }
         }
 
         /// <summary>
@@ -126,6 +125,8 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void FlipButton_Click(object sender, RoutedEventArgs e)
         {
+            //if (AutoFlipYN.IsChecked ?? false)
+            //    return;
             FlipButtonExecute();
             if (SlapButton.IsEnabled == false)
             {
@@ -134,7 +135,7 @@ namespace SlapJackGame
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
             FlipButton.IsEnabled = false;
             SlapButton.IsEnabled = true;
-            
+
             // If the player is a computer and has Any cards in their hand
             foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
             {
@@ -143,14 +144,23 @@ namespace SlapJackGame
                 GameHander();
             }
 
-            FlipButton.IsEnabled = true;
+            if (AutoFlipYN.IsChecked ?? false)
+            {
+                await Task.Delay(2000);
+                FlipButton_Click(sender, e);
+            }
+            else
+                FlipButton.IsEnabled = true;
         }
 
+        /// <summary>
+        /// Executes the Flip Button
+        /// </summary>
         private void FlipButtonExecute()
         {
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
-                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
+                PlayerHand.Visibility = Visibility.Hidden;
                 _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
             }
             else
@@ -163,6 +173,10 @@ namespace SlapJackGame
             }
         }
 
+        /// <summary>
+        /// Adds a card to the middle game pile
+        /// </summary>
+        /// <param name="card"></param>
         private void AddToGamePile(Card card)
         {
             _board.AddToGamePile(card);
@@ -197,39 +211,39 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void SlapButton_Click(object sender, RoutedEventArgs e)
         {
+            //if (!SlapButton.IsEnabled)
+            //    return;
             SlapButtonExecute();
-            if(_board.GamePile.Count == 0)
-            {
+            if (_board.GamePile.Count == 0)
                 SlapButton.IsEnabled = false;
-            }
+
             SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
             await Task.Delay(1000);
         }
 
+        /// <summary>
+        /// Executes the Slap Button
+        /// </summary>
         private void SlapButtonExecute()
         {
             /// bool to test if player slapped on jack
             bool RightSlap;
             if (!SlapButton.IsEnabled)
                 return;
-           RightSlap = _board.UserSlap();
+
+            RightSlap = _board.UserSlap();
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
+
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
 
             foreach (var player in _board.Players)
-            {
-                if(player.LastChance == true)
-                {
+                if (player.LastChance == true)
                     _board.Players.Remove(player);
-                }
-            }
 
             ///if slapped on something besides jack disable slap button
             if (!RightSlap)
-            {
                 SlapButton.IsEnabled = false;
-            }
         }
 
         /// <summary>
@@ -267,6 +281,42 @@ namespace SlapJackGame
             MessageBox.Show(instructions, "How to Play");
         }
 
+        /// <summary>
+        /// Reacts to the 'Automatically Flip?' button. Disables the Flip button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AutoFlipYN_Checked(object sender, RoutedEventArgs e)
+        {
+            if (AutoFlipYN.IsChecked ?? false)
+                if (FlipButton.IsEnabled)
+                {
+                    FlipButton.IsEnabled = false;
+                    FlipButton_Click(sender, e);
+                }
+                else // This is needed twice as the above command won't disable the button if you click 
+                    FlipButton.IsEnabled = false;
+            else
+                FlipButton.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Pop up window to either start a new game or exit the program
+        /// </summary>
+        private void EndOfGamePopupWindow()
+        {
+            MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
+            if (MessageBox.Show("What would you like to do?", "End of Game", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                _board = new Board();
+                CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
+                BeginExecute();
+            }
+            else
+            {
+                Close();
+            }
+        }
         #endregion
     }
 }
