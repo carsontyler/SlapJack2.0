@@ -80,7 +80,7 @@
                     break;
             }
 
-            if(CardNum == 1 || CardNum > 10)
+            if (CardNum == 1 || CardNum > 10)
                 return face + " of " + _suit;
             else
                 return CardNum + " of " + _suit;

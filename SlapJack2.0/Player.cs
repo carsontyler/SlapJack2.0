@@ -1,9 +1,5 @@
 ﻿using Assignment1;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlapJackGame
 {
@@ -14,7 +10,7 @@ namespace SlapJackGame
     class Player
     {
         #region Fields
-        
+
         private bool _isComputer;
 
         #endregion
@@ -22,10 +18,12 @@ namespace SlapJackGame
         #region Properties
 
         public Hand Hand { get; set; }
-        /// <summary>
-        /// bool for if player runs out of cards. Last time to slap in.
-        /// </summary>
+
+        // bool for if player runs out of cards. Last time to slap in.
         public bool LastChance = false;
+
+        // Boolean if the player is removed from the game. Better than 
+        public bool RemovedFromGame = false;
 
         #endregion
 
@@ -71,8 +69,8 @@ namespace SlapJackGame
             if (isJack)
                 //Shuffle hand
                 Hand.Shuffle();
-                //Add cards to hand
-                //AddCards(_gamePile); // We do this in the Board class
+            //Add cards to hand
+            //AddCards(_gamePile); // We do this in the Board class
             else
                 //Remove card from player's hand
                 Hand.RemoveCard();

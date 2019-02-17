@@ -1,10 +1,7 @@
 ﻿using Assignment1;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace SlapJackGame
@@ -14,10 +11,9 @@ namespace SlapJackGame
     /// </summary>
     class Board
     {
-        #region Fields
 
-        private List<Card> _gamePile = new List<Card>();
-        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        #region Fields
+        SpeechSynthesizer _synthesizer = new SpeechSynthesizer();
 
 
         #endregion
@@ -26,7 +22,9 @@ namespace SlapJackGame
 
         public Deck Deck { get; set; }
         public List<Player> Players { get; set; }
-        public List<Card> GamePile { get { return _gamePile; } set { _gamePile = value; } }
+        public List<Card> GamePile { get; set; } = new List<Card>();
+
+        public bool VolumeYN { get; set; }
 
         #endregion
 
@@ -48,6 +46,7 @@ namespace SlapJackGame
                     Players.Add(new Player(true));
             }
             Deal();
+            VolumeYN = true;
         }
 
         #endregion
@@ -89,11 +88,11 @@ namespace SlapJackGame
         /// <param name="card">The card to be added</param>
         public void AddToGamePile(Card card)
         {
-            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
-            synthesizer.Volume = 100;  // (0 - 100)
-            synthesizer.Rate = 0;     // (-10 - 10)
+            _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            _synthesizer.Volume = 100;  // (0 - 100)
+            _synthesizer.Rate = 0;     // (-10 - 10)
 
-            synthesizer.SpeakAsync("" + card.ToString());
+            if (VolumeYN) _synthesizer.SpeakAsync("" + card.ToString());
             GamePile.Add(card);
         }
 
@@ -141,8 +140,8 @@ namespace SlapJackGame
                 if (!(GamePile.Count == 0))
                 {
                     //currentComputer.Slap(true, GamePile);
-                    MessageBox.Show("Computer got the slap!");
                     currentComputer.Slap(true, GamePile);
+                    MessageBox.Show("Computer got the slap!");
                     ClearGamePile(currentComputer);
                 }
             }

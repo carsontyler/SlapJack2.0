@@ -1,7 +1,5 @@
 ﻿using Assignment1;
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Media;
 using System.Speech.Synthesis;
@@ -25,7 +23,7 @@ namespace SlapJackGame
         string _gamePileImage = "pack://application:,,,/image/CardBack.jpg";
         private delegate void NoArgDelegate();
         private Player _player;
-        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        SpeechSynthesizer _synthesizer = new SpeechSynthesizer();
 
         #endregion
 
@@ -42,7 +40,6 @@ namespace SlapJackGame
         /// </summary>
         public MainWindow()
         {
-
             InitializeComponent();
             NameLabel.Background.Opacity = 0.5;
             GameTitleLabel.Background.Opacity = 0.5;
@@ -66,15 +63,14 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private void Begin_Click(Object sender, RoutedEventArgs e)
         {
-            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
-            synthesizer.Volume = 100;  // (0 - 100)
-            synthesizer.Rate = 0;     // (-10 - 10)           
-
+            _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            _synthesizer.Volume = 100;  // (0 - 100)
+            _synthesizer.Rate = 0;     // (-10 - 10)           
 
             if (String.IsNullOrEmpty(NameTxtBox.Text))
             {
                 NameLabel.Foreground = new SolidColorBrush(Colors.Red);
-                synthesizer.SpeakAsync("Please enter player's name");
+                if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("Please enter player's name");
             }
             else
             {
@@ -83,10 +79,12 @@ namespace SlapJackGame
                 player.Play();
 
                 System.Threading.Thread.Sleep(2000);
-
-                synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
-                synthesizer.SpeakAsync("Best of luck");
-                synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
+                if (VolumeYN2.IsChecked ?? false)
+                {
+                    _synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
+                    _synthesizer.SpeakAsync("Best of luck");
+                    _synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
+                }
             }
         }
 
@@ -100,8 +98,8 @@ namespace SlapJackGame
             GameTitleLabel.Visibility = Visibility.Hidden;
             NameTxtBox.Visibility = Visibility.Hidden;
             NameLabel.Visibility = Visibility.Hidden;
+            QuestionMark.Visibility = Visibility.Hidden;
             SlapButton.Visibility = Visibility.Visible;
-            SlapButton.IsEnabled = false;
             FlipButton.Visibility = Visibility.Visible;
             CardsRemaining.Visibility = Visibility.Visible;
             CardsRemainingLabel.Visibility = Visibility.Visible;
@@ -110,11 +108,14 @@ namespace SlapJackGame
             CompHand2.Visibility = Visibility.Visible;
             CompHand3.Visibility = Visibility.Visible;
             PlayerName.Visibility = Visibility.Visible;
-            PlayerName.Content = NameTxtBox.Text;
-            SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
-            QuestionMark.Visibility = Visibility.Hidden;
             QuestionMark2.Visibility = Visibility.Visible;
             AutoFlipYN.Visibility = Visibility.Visible;
+            Rect2.Visibility = Visibility.Visible;
+            Rect3.Visibility = Visibility.Visible;
+            VolumeYN2.Visibility = Visibility.Visible;
+            PlayerName.Content = NameTxtBox.Text;
+            SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
+            SlapButton.IsEnabled = false;
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace SlapJackGame
             FlipButton.IsEnabled = false;
             SlapButton.IsEnabled = true;
             // If the player is a computer and has Any cards in their hand
-            foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
+            foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any() && !a.RemovedFromGame))
             {
                 //Simulate the computer slap
                 await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
@@ -194,12 +195,12 @@ namespace SlapJackGame
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
                 PlayerHand.Visibility = Visibility.Hidden;
-                
-                synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult); 
-                synthesizer.Volume = 100;  // (0 - 100)
-                synthesizer.Rate = 0;     // (-10 - 10)
-                                          
-                synthesizer.SpeakAsync("You're out of cards!");
+
+                _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+                _synthesizer.Volume = 100;  // (0 - 100)
+                _synthesizer.Rate = 0;     // (-10 - 10)
+
+                if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("You're out of cards!");
 
                 MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
                 _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
@@ -252,16 +253,16 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void SlapButton_Click(object sender, RoutedEventArgs e)
         {
-            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
-            synthesizer.Volume = 100;  // (0 - 100)
-            synthesizer.Rate = 0;     // (-10 - 10)
+            _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            _synthesizer.Volume = 100;  // (0 - 100)
+            _synthesizer.Rate = 0;     // (-10 - 10)
 
-            synthesizer.SpeakAsync("Slapped");
+            if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("Slapped");
 
             SlapButtonExecute();
-            if(_board.GamePile.Count == 0)
+            if (_board.GamePile.Count == 0)
                 SlapButton.IsEnabled = false;
-            
+
             SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
             await Task.Delay(1000);
         }
@@ -282,9 +283,9 @@ namespace SlapJackGame
 
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
 
-            foreach (var player in _board.Players)
+            foreach (var player in _board.Players.Where(a => !a.RemovedFromGame))
                 if (player.LastChance == true)
-                    _board.Players.Remove(player);
+                    player.RemovedFromGame = true;
 
             ///if slapped on something besides jack disable slap button
             if (!RightSlap)
@@ -361,6 +362,12 @@ namespace SlapJackGame
             {
                 Close();
             }
+        }
+
+        private void VolumeYN_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_board != null)
+                _board.VolumeYN = VolumeYN2.IsChecked ?? false;
         }
         #endregion
     }
