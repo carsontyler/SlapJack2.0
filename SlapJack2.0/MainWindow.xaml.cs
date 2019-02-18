@@ -75,16 +75,6 @@ namespace SlapJackGame
             else
             {
                 BeginExecute();
-                SoundPlayer player = new SoundPlayer(SlapJack2._0.Properties.Resources.ahem_x);
-                player.Play();
-
-                System.Threading.Thread.Sleep(2000);
-                if (VolumeYN2.IsChecked ?? false)
-                {
-                    _synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
-                    _synthesizer.SpeakAsync("Best of luck");
-                    _synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
-                }
             }
         }
 
@@ -116,6 +106,17 @@ namespace SlapJackGame
             PlayerName.Content = NameTxtBox.Text;
             SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
             SlapButton.IsEnabled = false;
+
+            SoundPlayer player = new SoundPlayer(SlapJack2._0.Properties.Resources.ahem_x);
+            player.Play();
+
+            System.Threading.Thread.Sleep(2000);
+            if (VolumeYN2.IsChecked ?? false)
+            {
+                _synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
+                _synthesizer.SpeakAsync("Best of luck");
+                _synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
+            }
         }
 
         /// <summary>
@@ -192,6 +193,28 @@ namespace SlapJackGame
         /// </summary>
         private void FlipButtonExecute()
         {
+            //If the user is out of cards, they lose
+            if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
+                EndOfGamePopupWindow();
+
+            //User flips card
+            var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                AddToGamePile(card);
+            });
+
+            //Check if user is out of cards
+            OutOfCardsCheckUser();
+        }
+
+        /// <summary>
+        /// Method that checks if the user is out of cards in their hand. If they are,
+        /// Their Last Chance is set to true
+        /// </summary>
+        /// <param name="currentPlayer"></param>
+        private void OutOfCardsCheckUser()
+        {
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
                 PlayerHand.Visibility = Visibility.Hidden;
@@ -202,16 +225,10 @@ namespace SlapJackGame
 
                 if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("You're out of cards!");
 
-                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
+                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards! You are on your last chance. If you fail another slap, you'll lose!");
                 _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
-            }
-            else
-            {
-                var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
-                Application.Current.Dispatcher.Invoke(delegate
-                {
-                    AddToGamePile(card);
-                });
+
+                FlipButton.IsEnabled = false;
             }
         }
 
@@ -260,6 +277,10 @@ namespace SlapJackGame
             if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("Slapped");
 
             SlapButtonExecute();
+
+            //Check if user is out of cards
+            OutOfCardsCheckUser();
+
             if (_board.GamePile.Count == 0)
                 SlapButton.IsEnabled = false;
 
@@ -278,6 +299,12 @@ namespace SlapJackGame
                 return;
 
             RightSlap = _board.UserSlap();
+
+            //If user is on last chance and failed userSlap, game is over
+            if (!RightSlap && _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance)
+                EndOfGamePopupWindow();
+
+
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
 
@@ -352,7 +379,7 @@ namespace SlapJackGame
         private void EndOfGamePopupWindow()
         {
             MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
-            if (MessageBox.Show("What would you like to do?", "End of Game", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Would you like to play again?", "End of Game", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 _board = new Board();
                 CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();

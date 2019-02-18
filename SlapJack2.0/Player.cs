@@ -69,8 +69,6 @@ namespace SlapJackGame
             if (isJack)
                 //Shuffle hand
                 Hand.Shuffle();
-            //Add cards to hand
-            //AddCards(_gamePile); // We do this in the Board class
             else
                 //Remove card from player's hand
                 Hand.RemoveCard();

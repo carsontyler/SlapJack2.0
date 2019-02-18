@@ -114,13 +114,23 @@ namespace SlapJackGame
             {
                 Players.FirstOrDefault(a => !a.GetIsComputer()).Slap(true, GamePile);
                 ClearGamePile(Players.FirstOrDefault(a => !a.GetIsComputer()));
+                Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = false;
                 return true;
             }
             else
             {
-                MessageBox.Show("You slapped on a card that's not a Jack. You lose one card!", "Incorrect Slap", MessageBoxButton.OK);
-                var card = Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.RemoveCard();
-                Players.FirstOrDefault(a => a.GetIsComputer()).Hand.AddCard(card);
+                //If user is in last chance and slaps on a card that's not a jack, they lose
+                if(Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance)
+                {
+                    MessageBox.Show("You slapped on a card that's not a Jack while on your last chance. You lose!", "Incorrect Slap", MessageBoxButton.OK);
+                }
+                else
+                {
+                    MessageBox.Show("You slapped on a card that's not a Jack. You lose one card!", "Incorrect Slap", MessageBoxButton.OK);
+                    var card = Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.RemoveCard();
+                    Players.FirstOrDefault(a => a.GetIsComputer()).Hand.AddCard(card);
+                }
+                
                 return false;
             }
         }
