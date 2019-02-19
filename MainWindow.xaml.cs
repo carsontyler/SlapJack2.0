@@ -1,7 +1,5 @@
 ﻿using Assignment1;
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Media;
 using System.Speech.Synthesis;
@@ -25,7 +23,7 @@ namespace SlapJackGame
         string _gamePileImage = "pack://application:,,,/image/CardBack.jpg";
         private delegate void NoArgDelegate();
         private Player _player;
-        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        SpeechSynthesizer _synthesizer = new SpeechSynthesizer();
 
         #endregion
 
@@ -42,11 +40,9 @@ namespace SlapJackGame
         /// </summary>
         public MainWindow()
         {
-
             InitializeComponent();
             NameLabel.Background.Opacity = 0.5;
             GameTitleLabel.Background.Opacity = 0.5;
-            
             _board = new Board();
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
         }
@@ -67,38 +63,33 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private void Begin_Click(Object sender, RoutedEventArgs e)
         {
-            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
-            synthesizer.Volume = 100;  // (0 - 100)
-            synthesizer.Rate = 0;     // (-10 - 10)           
-
+            _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            _synthesizer.Volume = 100;  // (0 - 100)
+            _synthesizer.Rate = 0;     // (-10 - 10)           
 
             if (String.IsNullOrEmpty(NameTxtBox.Text))
             {
                 NameLabel.Foreground = new SolidColorBrush(Colors.Red);
-                synthesizer.SpeakAsync("Please enter player's name");
+                if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("Please enter player's name");
             }
             else
             {
                 BeginExecute();
-                SoundPlayer player = new SoundPlayer(SlapJack2._0.Properties.Resources.ahem_x);
-                player.Play();
-
-                System.Threading.Thread.Sleep(2000);
-
-                synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
-                synthesizer.SpeakAsync("Best of luck");
-                synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
             }
         }
 
+        /// <summary>
+        /// When the user clicks 'Let's Begin!'. 
+        /// Sets the visibilty of various components to display the game board.
+        /// </summary>
         private void BeginExecute()
         {
             BeginButton.Visibility = Visibility.Hidden;
             GameTitleLabel.Visibility = Visibility.Hidden;
             NameTxtBox.Visibility = Visibility.Hidden;
             NameLabel.Visibility = Visibility.Hidden;
+            QuestionMark.Visibility = Visibility.Hidden;
             SlapButton.Visibility = Visibility.Visible;
-            SlapButton.IsEnabled = false;
             FlipButton.Visibility = Visibility.Visible;
             CardsRemaining.Visibility = Visibility.Visible;
             CardsRemainingLabel.Visibility = Visibility.Visible;
@@ -107,39 +98,49 @@ namespace SlapJackGame
             CompHand2.Visibility = Visibility.Visible;
             CompHand3.Visibility = Visibility.Visible;
             PlayerName.Visibility = Visibility.Visible;
+            QuestionMark2.Visibility = Visibility.Visible;
+            AutoFlipYN.Visibility = Visibility.Visible;
+            Rect2.Visibility = Visibility.Visible;
+            Rect3.Visibility = Visibility.Visible;
+            VolumeYN2.Visibility = Visibility.Visible;
             PlayerName.Content = NameTxtBox.Text;
             SlapJack_Game.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/image/game_background.jpg")));
-            QuestionMark.Visibility = Visibility.Hidden;
-            QuestionMark2.Visibility = Visibility.Visible;
+            SlapButton.IsEnabled = false;
+
+            SoundPlayer player = new SoundPlayer(SlapJack2._0.Properties.Resources.ahem_x);
+            player.Play();
+
+            System.Threading.Thread.Sleep(2000);
+            if (VolumeYN2.IsChecked ?? false)
+            {
+                _synthesizer.SpeakAsync("Welcome " + NameTxtBox.Text);
+                _synthesizer.SpeakAsync("Best of luck");
+                _synthesizer.SpeakAsync("Flip the card to Begin and get ready to slap.");
+            }
         }
 
+        /// <summary>
+        /// Handles the automation of the computers
+        /// </summary>
         private void GameHander()
         {
             var card = _player.FlipCard();
-            if(_player.Hand.GetSize() == 0)
+            if (_player.Hand.GetSize() == 0)
             {
                 _player.LastChance = true;
                 if (CompHand1.Visibility != Visibility.Hidden)
-                {
                     CompHand1.Visibility = Visibility.Hidden;
-                }
-                else if(CompHand2.Visibility != Visibility.Hidden)
-                {
+                else if (CompHand2.Visibility != Visibility.Hidden)
                     CompHand2.Visibility = Visibility.Hidden;
-                }
                 else
-                {
                     CompHand3.Visibility = Visibility.Hidden;
-                }
             }
             Application.Current.Dispatcher.Invoke(delegate
             {
                 AddToGamePile(card);
             });
-            if(SlapButton.IsEnabled == false)
-            {
+            if (SlapButton.IsEnabled == false)
                 SlapButton.IsEnabled = true;
-            }
         }
 
         /// <summary>
@@ -150,6 +151,8 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void FlipButton_Click(object sender, RoutedEventArgs e)
         {
+            //if (AutoFlipYN.IsChecked ?? false)
+            //    return;
             FlipButtonExecute();
             if (SlapButton.IsEnabled == false)
             {
@@ -158,42 +161,82 @@ namespace SlapJackGame
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
             FlipButton.IsEnabled = false;
             SlapButton.IsEnabled = true;
-            
             // If the player is a computer and has Any cards in their hand
-            foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any()))
+            foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any() && !a.RemovedFromGame))
             {
+                //Simulate the computer slap
+                await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
+
+                if (!_board.GamePile.Any())
+                    GamePile.Children.Clear();
+                CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
+
                 _player = player;
                 await Task.Delay(2000);
                 GameHander();
             }
+            //Simulate the computer slap after the last computer has gone
+            await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
 
-            FlipButton.IsEnabled = true;
+
+            if (AutoFlipYN.IsChecked ?? false)
+            {
+                await Task.Delay(2000);
+                FlipButton_Click(sender, e);
+            }
+            else
+                FlipButton.IsEnabled = true;
         }
 
+        /// <summary>
+        /// Executes the Flip Button
+        /// </summary>
         private void FlipButtonExecute()
+        {
+            //If the user is out of cards, they lose
+            if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
+                EndOfGamePopupWindow();
+
+            //User flips card
+            var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                AddToGamePile(card);
+            });
+
+            //Check if user is out of cards
+            OutOfCardsCheckUser();
+        }
+
+        /// <summary>
+        /// Method that checks if the user is out of cards in their hand. If they are,
+        /// Their Last Chance is set to true
+        /// </summary>
+        /// <param name="currentPlayer"></param>
+        private void OutOfCardsCheckUser()
         {
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.GetSize() == 0)
             {
-                
-                synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult); 
-                synthesizer.Volume = 100;  // (0 - 100)
-                synthesizer.Rate = 0;     // (-10 - 10)
-                                          
-                synthesizer.SpeakAsync("You're out of cards!");
+                PlayerHand.Visibility = Visibility.Hidden;
 
-                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards!");
+                _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+                _synthesizer.Volume = 100;  // (0 - 100)
+                _synthesizer.Rate = 0;     // (-10 - 10)
+
+                if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("You're out of cards!");
+
+                _synthesizer.SpeakAsync("You're out of cards! You are on your last chance. If you fail another slap, you'll lose!");
+                MessageBoxResult outOfCards = MessageBox.Show("You're out of cards! You are on your last chance. If you fail another slap, you'll lose!");
                 _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
-            }
-            else
-            {
-                var card = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).FlipCard();
-                Application.Current.Dispatcher.Invoke(delegate
-                {
-                    AddToGamePile(card);
-                });
+
+                FlipButton.IsEnabled = false;
             }
         }
 
+        /// <summary>
+        /// Adds a card to the middle game pile
+        /// </summary>
+        /// <param name="card"></param>
         private void AddToGamePile(Card card)
         {
             _board.AddToGamePile(card);
@@ -228,45 +271,53 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void SlapButton_Click(object sender, RoutedEventArgs e)
         {
-            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
-            synthesizer.Volume = 100;  // (0 - 100)
-            synthesizer.Rate = 0;     // (-10 - 10)
+            _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            _synthesizer.Volume = 100;  // (0 - 100)
+            _synthesizer.Rate = 0;     // (-10 - 10)
 
-            synthesizer.SpeakAsync("Slapped");
+            if (VolumeYN2.IsChecked ?? false) _synthesizer.SpeakAsync("Slapped");
 
             SlapButtonExecute();
-            if(_board.GamePile.Count == 0)
-            {
+
+            //Check if user is out of cards
+            OutOfCardsCheckUser();
+
+            if (_board.GamePile.Count == 0)
                 SlapButton.IsEnabled = false;
-            }
+
             SlapJack_Game.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, (NoArgDelegate)delegate { });
             await Task.Delay(1000);
         }
 
+        /// <summary>
+        /// Executes the Slap Button
+        /// </summary>
         private void SlapButtonExecute()
         {
             /// bool to test if player slapped on jack
             bool RightSlap;
             if (!SlapButton.IsEnabled)
                 return;
-           RightSlap = _board.UserSlap();
+
+            RightSlap = _board.UserSlap();
+
+            //If user is on last chance and failed userSlap, game is over
+            if (!RightSlap && _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance)
+                EndOfGamePopupWindow();
+
+
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
+
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
 
-            foreach (var player in _board.Players)
-            {
-                if(player.LastChance == true)
-                {
-                    _board.Players.Remove(player);
-                }
-            }
+            foreach (var player in _board.Players.Where(a => !a.RemovedFromGame))
+                if (player.LastChance == true)
+                    player.RemovedFromGame = true;
 
             ///if slapped on something besides jack disable slap button
             if (!RightSlap)
-            {
                 SlapButton.IsEnabled = false;
-            }
         }
 
         /// <summary>
@@ -301,13 +352,54 @@ namespace SlapJackGame
                 "\n    6. If you slap the deck when a Jack is not flipped, you must choose a random card from your hand and pass it to the player " +
                 "on your left. \n     7. If you run out of cards, you are still in the game until a Jack is dealt. If a Jack is dealt and you " +
                 "are not the first player to slap it, you lose! If you do slap the Jack, you collect the game pile and continue on!";
-
-
-            
-
             MessageBox.Show(instructions, "How to Play");
         }
 
+        /// <summary>
+        /// Reacts to the 'Automatically Flip?' button. Disables the Flip button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AutoFlipYN_Checked(object sender, RoutedEventArgs e)
+        {
+            if (AutoFlipYN.IsChecked ?? false)
+                if (FlipButton.IsEnabled)
+                {
+                    FlipButton.IsEnabled = false;
+                    FlipButton_Click(sender, e);
+                }
+                else // This is needed twice as the above command won't disable the button if you click 
+                    FlipButton.IsEnabled = false;
+            else
+                FlipButton.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Pop up window to either start a new game or exit the program
+        /// </summary>
+        private void EndOfGamePopupWindow()
+        {
+            _synthesizer.SpeakAsync("Sorry You Lost!!!");
+            MessageBoxResult outOfCards = MessageBox.Show("Sorry You Lost!!!");
+
+            _synthesizer.SpeakAsync("Would You Like to Play Again?");
+            if (MessageBox.Show("Would you like to play again?", "End of Game", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                _board = new Board();
+                CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
+                BeginExecute();
+            }
+            else
+            {
+                Close();
+            }
+        }
+
+        private void VolumeYN_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_board != null)
+                _board.VolumeYN = VolumeYN2.IsChecked ?? false;
+        }
         #endregion
     }
 }

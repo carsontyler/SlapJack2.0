@@ -1,10 +1,8 @@
 ﻿using Assignment1;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace SlapJackGame
 {
@@ -13,10 +11,9 @@ namespace SlapJackGame
     /// </summary>
     class Board
     {
-        #region Fields
 
-        private List<Card> _gamePile = new List<Card>();
-        SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        #region Fields
+        SpeechSynthesizer _synthesizer = new SpeechSynthesizer();
 
 
         #endregion
@@ -25,7 +22,9 @@ namespace SlapJackGame
 
         public Deck Deck { get; set; }
         public List<Player> Players { get; set; }
-        public List<Card> GamePile { get { return _gamePile; } set { _gamePile = value; } }
+        public List<Card> GamePile { get; set; } = new List<Card>();
+
+        public bool VolumeYN { get; set; }
 
         #endregion
 
@@ -47,6 +46,7 @@ namespace SlapJackGame
                     Players.Add(new Player(true));
             }
             Deal();
+            VolumeYN = true;
         }
 
         #endregion
@@ -88,11 +88,11 @@ namespace SlapJackGame
         /// <param name="card">The card to be added</param>
         public void AddToGamePile(Card card)
         {
-            synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
-            synthesizer.Volume = 100;  // (0 - 100)
-            synthesizer.Rate = 0;     // (-10 - 10)
+            _synthesizer.SelectVoiceByHints(VoiceGender.Male, VoiceAge.Adult);
+            _synthesizer.Volume = 100;  // (0 - 100)
+            _synthesizer.Rate = 0;     // (-10 - 10)
 
-            synthesizer.SpeakAsync("" + card.ToString());
+            if (VolumeYN) _synthesizer.SpeakAsync("" + card.ToString());
             GamePile.Add(card);
         }
 
@@ -114,13 +114,46 @@ namespace SlapJackGame
             {
                 Players.FirstOrDefault(a => !a.GetIsComputer()).Slap(true, GamePile);
                 ClearGamePile(Players.FirstOrDefault(a => !a.GetIsComputer()));
+                Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = false;
                 return true;
             }
             else
             {
-                var card = Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.RemoveCard();
-                Players.FirstOrDefault(a => a.GetIsComputer()).Hand.AddCard(card);
+                //If user is in last chance and slaps on a card that's not a jack, they lose
+                if(Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance)
+                {
+                    MessageBox.Show("You slapped on a card that's not a Jack while on your last chance. You lose!", "Incorrect Slap", MessageBoxButton.OK);
+                }
+                else
+                {
+                    MessageBox.Show("You slapped on a card that's not a Jack. You lose one card!", "Incorrect Slap", MessageBoxButton.OK);
+                    var card = Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.RemoveCard();
+                    Players.FirstOrDefault(a => a.GetIsComputer()).Hand.AddCard(card);
+                }
+                
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Method that checks for a computer's slap. If the card is a Jack
+        /// </summary>
+        /// <param name="temp"></param>
+        public void ComputerSlap(Player currentComputer)
+        {
+            //Check for Jack
+            if (GamePile.Any() && GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
+            {
+                //Make computer wait, and then check to see if pile still exists
+                //If it does, computer gets the slap
+
+                if (!(GamePile.Count == 0))
+                {
+                    //currentComputer.Slap(true, GamePile);
+                    currentComputer.Slap(true, GamePile);
+                    MessageBox.Show("Computer got the slap!");
+                    ClearGamePile(currentComputer);
+                }
             }
         }
 

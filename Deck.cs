@@ -2,11 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SlapJackGame
-{    
+{
     /// <summary>
     /// Base Deck class. Used by the Board and is the base deck for the game
     /// </summary>

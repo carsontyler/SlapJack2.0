@@ -12,6 +12,26 @@
         <Grid.Background>
             <ImageBrush ImageSource="image/background.jpg"/>
         </Grid.Background>
+        <Rectangle x:Name="Rect2" 
+                   HorizontalAlignment="Left" 
+                   Height="18" 
+                   Margin="630,9,0,0" 
+                   Stroke="Black" 
+                   VerticalAlignment="Top" 
+                   Visibility="Collapsed"
+                   Fill="#664400"                   
+                   Width="148"
+                   StrokeThickness="0"/>
+        <Rectangle x:Name="Rect3" 
+                   HorizontalAlignment="Left" 
+                   Height="17" 
+                   Margin="630,447,0,0" 
+                   Stroke="Black" 
+                   VerticalAlignment="Top" 
+                   Visibility="Collapsed"
+                   Fill="#664400"                   
+                   Width="148"
+                   StrokeThickness="0"/>
         <Button x:Name="BeginButton" 
                 Content="Lets Begin!" 
                 HorizontalAlignment="Left" 
@@ -47,7 +67,7 @@
                 FontWeight="Bold" 
                 FontSize="20"
                 FontFamily="Yu Gothic UI Semibold" 
-                Visibility="Hidden"
+                Visibility="Collapsed"
                 Click="FlipButton_Click"
                 BorderBrush="#664400"
                 BorderThickness="3"/>
@@ -84,13 +104,12 @@
                    HorizontalAlignment="Left" 
                    Height="35" 
                    Margin="214,471,0,14.8" 
-                   Text="{Binding Path=CardsRemaining, ElementName=window}" 
+                   Text="{Binding CardsRemaining, ElementName=window}" 
                    Width="52" 
                    VerticalAlignment="Center"
                    FontSize="20"
                    FontFamily="Yu Gothic UI Semibold" 
                    Visibility="Hidden">
-
             <TextBlock.Background>
                 <SolidColorBrush Opacity="0" />
             </TextBlock.Background>
@@ -131,7 +150,7 @@
                Visibility="Collapsed"
                Width="87" 
                Source="/image/CardBack.jpg"/>
-        <Canvas Name="GamePile" 
+        <Canvas x:Name="GamePile" 
                 Height="33" 
                 Margin="352,93,352.6,198.8" 
                 MouseDown="SlapButton_Click"/>
@@ -152,8 +171,7 @@
                VerticalAlignment="Top" 
                FontSize="23" 
                FontWeight="Bold"
-               FontFamily="Yu Gothic UI Semibold">
-        </Label>
+               FontFamily="Yu Gothic UI Semibold"/>
         <Image x:Name="QuestionMark"
                Source="/image/questionmark.png"
                Visibility="Visible" 
@@ -164,5 +182,30 @@
                Visibility="Hidden" 
                Margin="0,5,731.6,470.8"
                MouseDown="QuestionMark_MouseDown"/>
+        <CheckBox x:Name="AutoFlipYN" 
+                  Content="Automatically Flip" 
+                  HorizontalAlignment="Left" 
+                  FontWeight="Bold" 
+                  FontSize="13"
+                  FontFamily="Yu Gothic UI Semibold" 
+                  Height="17" 
+                  Visibility="Hidden"
+                  Margin="631,448,0,0" 
+                  VerticalAlignment="Top" 
+                  Width="150" Checked="AutoFlipYN_Checked"/>
+        <CheckBox x:Name="VolumeYN2" 
+                  Content="Volume On/Off" 
+                  HorizontalAlignment="Left" 
+                  FontWeight="Bold" 
+                  FontSize="13"
+                  FontFamily="Yu Gothic UI Semibold" 
+                  Height="17" 
+                  Visibility="Collapsed"
+                  VerticalAlignment="Top" 
+                  Width="152" 
+                  Margin="630,10,0,0"
+                  Checked="VolumeYN_Checked"
+                  Unchecked="VolumeYN_Checked"
+                  IsChecked="True"/>
     </Grid>
 </Window>
