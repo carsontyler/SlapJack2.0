@@ -151,6 +151,7 @@ namespace SlapJackGame
         /// <param name="e"></param>
         private async void FlipButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!FlipButton.IsVisible) return;
             //if (AutoFlipYN.IsChecked ?? false)
             //    return;
             FlipButtonExecute();
@@ -280,6 +281,13 @@ namespace SlapJackGame
 
             //Check if user is out of cards
             OutOfCardsCheckUser();
+            
+            //Check if user is the last one standing
+            if (!_board.Players.Any(a => !a.RemovedFromGame && a.GetIsComputer()))
+            {
+                EndOfGamePopupWindow();
+                return;
+            }
 
             if (_board.GamePile.Count == 0)
                 SlapButton.IsEnabled = false;
@@ -327,10 +335,13 @@ namespace SlapJackGame
         private void SlapJgame_KeyDown(object sender, KeyEventArgs e)
         {
             var key = e.Key.ToString();
-            if (key == "Space")
+            if (key == "Space" && SlapButton.IsVisible && SlapButton.IsEnabled)
                 SlapButtonExecute();
-            else if (key.ToLower() == "f")
+            else if (key.ToLower() == "f" && FlipButton.IsVisible && FlipButton.IsEnabled)
+            {
+                FlipButton.IsEnabled = false;
                 FlipButtonExecute();
+            }
         }
 
         /// <summary>

@@ -110,7 +110,7 @@ namespace SlapJackGame
         /// </summary>
         public bool UserSlap()
         {
-            if (GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
+            if (GamePile.Any() && GamePile.ElementAt(GamePile.Count - 1).CardNum == 11)
             {
                 Players.FirstOrDefault(a => !a.GetIsComputer()).Slap(true, GamePile);
                 ClearGamePile(Players.FirstOrDefault(a => !a.GetIsComputer()));
