@@ -64,7 +64,7 @@ namespace SlapJackGame
         /// <returns>The card that was removed to add to the game pile</returns>
         public Card RemoveCard()
         {
-            var returnCard = Cards.ElementAt(0);
+            var returnCard = Cards?.ElementAt(0) ?? null;
             Cards.RemoveAt(0);
             _size--;
             return returnCard;
