@@ -171,6 +171,7 @@ namespace SlapJackGame
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
             FlipButton.IsEnabled = false;
             SlapButton.IsEnabled = true;
+            
             // If the player is a computer and has Any cards in their hand
             foreach (var player in _board.Players.Where(a => a.GetIsComputer() && a.Hand.Cards.Any() && !a.RemovedFromGame))
             {
@@ -213,17 +214,21 @@ namespace SlapJackGame
                         break;
                 }
             }
+
             PlayerActiveHand.Visibility = !_board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance ? Visibility.Visible : Visibility.Collapsed;
+
             //Simulate the computer slap after the last computer has gone
             await Task.Delay(new Random().Next(500, 1000)).ContinueWith(t => _board.ComputerSlap(_player));
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
 
+            /*
             if (_board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance && _board.GamePile.Any())
             {
                 EndOfGamePopupWindow(false);
                 return;
             }
+            */
 
             if (AutoFlipYN.IsChecked ?? false)
             {
@@ -278,6 +283,12 @@ namespace SlapJackGame
                 _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = true;
 
                 FlipButton.IsEnabled = false;
+            }
+            //If the user slaps successfully on a last chance, restore card image and change last chance to false
+            else
+            {
+                PlayerHand.Visibility = Visibility.Visible;
+                _board.Players.FirstOrDefault(a => !a.GetIsComputer()).LastChance = false;
             }
         }
 
@@ -363,6 +374,9 @@ namespace SlapJackGame
 
             if (!_board.GamePile.Any())
                 GamePile.Children.Clear();
+
+            
+
 
             CardsRemaining.Text = _board.Players.FirstOrDefault(a => !a.GetIsComputer()).Hand.Cards.Count.ToString();
 
